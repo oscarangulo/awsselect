@@ -1,13 +1,71 @@
-# 🧭 awsselect
+# awsselect 🐘
 
-**awsselect** es una herramienta interactiva en línea de comandos para cambiar fácilmente entre perfiles configurados en AWS CLI.
+Herramienta interactiva para cambiar y persistir perfiles de AWS CLI fácilmente.
 
-Ideal si trabajás con múltiples cuentas y te cansaste de hacer `aws configure` o exportar perfiles a mano.
+## 🚀 Instalación con Homebrew
+
+```bash
+brew tap tuusuario/awsselect
+brew install awsselect
+```
+
+> Asegurate de tener GitHub CLI configurado o el repositorio disponible públicamente.
 
 ---
 
-## 🚀 Instalación vía Homebrew
+## 💻 Uso
 
-1. Agregá el *tap*:
-   ```bash
-   brew tap oscarangulo/tools
+```bash
+awsselect            # Muestra lista y selecciona perfil
+awsselect install    # Activa persistencia entre terminales
+```
+
+---
+
+## 🛠️ Cómo funciona
+
+- Lee perfiles desde `~/.aws/credentials`
+- Te permite seleccionar uno con `select` (menú interactivo)
+- Guarda el perfil en `~/.aws/selected_profile`
+- Modifica tu `~/.zshrc` o `~/.bashrc` para cargar automáticamente `AWS_PROFILE` en cada terminal
+
+---
+
+## 🧪 Ejemplo
+
+```bash
+$ awsselect
+🔍 Perfiles disponibles:
+1) default
+2) strixsoft
+3) staging
+#? 2
+✅ Perfil AWS seleccionado: strixsoft
+🔐 Cuenta activa:
+123456789012   arn:aws:iam::123456789012:user/dev
+```
+
+---
+
+## 📦 Desinstalación
+
+```bash
+brew uninstall awsselect
+brew untap tuusuario/awsselect
+```
+
+---
+
+## 📁 Estructura del proyecto
+
+```text
+awsselect/
+├── awsselect         # script principal
+├── README.md
+```
+
+---
+
+## 🧑‍💻 Licencia
+
+MIT © TuNombre

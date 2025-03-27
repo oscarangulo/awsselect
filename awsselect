@@ -1,32 +1,61 @@
 #!/bin/bash
 
-# Herramienta interactiva para cambiar entre perfiles de AWS
+CONFIG_LINE='export AWS_PROFILE=$(cat ~/.aws/selected_profile 2>/dev/null)'
 
-# Obtener lista de perfiles desde ~/.aws/credentials
+install_persistence() {
+  shell_rc=""
+  if [ -f "$HOME/.zshrc" ]; then
+    shell_rc="$HOME/.zshrc"
+  elif [ -f "$HOME/.bashrc" ]; then
+    shell_rc="$HOME/.bashrc"
+  else
+    echo "⚠️  No se encontró .bashrc ni .zshrc. Agregalo manualmente:"
+    echo "$CONFIG_LINE"
+    exit 1
+  fi
+
+  # Verificar si ya existe la línea
+  if grep -Fxq "$CONFIG_LINE" "$shell_rc"; then
+    echo "✅ Configuración ya existe en $shell_rc"
+  else
+    echo -e "\n# AWS profile auto-cargado por awsselect\n$CONFIG_LINE" >> "$shell_rc"
+    echo "✅ Configuración agregada a $shell_rc"
+  fi
+
+  echo "💡 Abrí una nueva terminal o ejecutá:"
+  echo "source $shell_rc"
+}
+
+# Modo instalación
+if [[ "$1" == "install" ]]; then
+  install_persistence
+  exit 0
+fi
+
+# Selección de perfil interactiva
 profiles=$(awk -F'[][]' '/\[.*\]/{print $2}' ~/.aws/credentials)
 
-# Verificar si hay perfiles configurados
 if [ -z "$profiles" ]; then
-    echo "⚠️  No se encontraron perfiles en ~/.aws/credentials"
-    exit 1
+  echo "⚠️  No se encontraron perfiles en ~/.aws/credentials"
+  exit 1
 fi
 
 echo "🔍 Perfiles disponibles:"
 select profile in $profiles; do
-    if [ -n "$profile" ]; then
-        export AWS_PROFILE="$profile"
-        echo "✅ AWS_PROFILE seteado a: $AWS_PROFILE"
+  if [ -n "$profile" ]; then
+    echo "$profile" > ~/.aws/selected_profile
+    export AWS_PROFILE="$profile"
+    echo "✅ Perfil AWS seleccionado: $profile"
 
-        # Mostrar información de la cuenta actual
-        identity=$(aws sts get-caller-identity --output text 2>/dev/null)
-        if [ $? -eq 0 ]; then
-            echo "🔐 Cuenta activa:"
-            echo "$identity"
-        else
-            echo "⚠️  No se pudo verificar la identidad con 'aws sts get-caller-identity'"
-        fi
-        break
+    identity=$(aws sts get-caller-identity --output text 2>/dev/null)
+    if [ $? -eq 0 ]; then
+      echo "🔐 Cuenta activa:"
+      echo "$identity"
     else
-        echo "❌ Opción inválida. Intentá de nuevo."
+      echo "⚠️  No se pudo verificar la identidad con 'aws sts get-caller-identity'"
     fi
+    break
+  else
+    echo "❌ Opción inválida. Intentá de nuevo."
+  fi
 done
