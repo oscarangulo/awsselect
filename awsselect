@@ -43,10 +43,11 @@ select profile in $profiles; do
 
     echo ""
     echo "🚀 El perfil se aplicará automáticamente en TODAS las terminales nuevas."
-    echo "👉 Si querés aplicarlo ahora mismo, ejecutá:"
     echo ""
-    echo "   export AWS_PROFILE=$profile"
+    echo "🟡 Para usarlo ahora mismo sin cerrar la terminal, ejecutá:"
     echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🧩  👉  export AWS_PROFILE=$profile"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     break
   else
