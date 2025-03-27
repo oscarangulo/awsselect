@@ -1,38 +1,7 @@
 #!/bin/bash
 
-CONFIG_LINE='export AWS_PROFILE=$(cat ~/.aws/selected_profile 2>/dev/null)'
+# Herramienta interactiva para cambiar entre perfiles de AWS CLI
 
-install_persistence() {
-  shell_rc=""
-  if [ -f "$HOME/.zshrc" ]; then
-    shell_rc="$HOME/.zshrc"
-  elif [ -f "$HOME/.bashrc" ]; then
-    shell_rc="$HOME/.bashrc"
-  else
-    echo "⚠️  No se encontró .bashrc ni .zshrc. Agregalo manualmente:"
-    echo "$CONFIG_LINE"
-    exit 1
-  fi
-
-  # Verificar si ya existe la línea
-  if grep -Fxq "$CONFIG_LINE" "$shell_rc"; then
-    echo "✅ Configuración ya existe en $shell_rc"
-  else
-    echo -e "\n# AWS profile auto-cargado por awsselect\n$CONFIG_LINE" >> "$shell_rc"
-    echo "✅ Configuración agregada a $shell_rc"
-  fi
-
-  echo "💡 Abrí una nueva terminal o ejecutá:"
-  echo "source $shell_rc"
-}
-
-# Modo instalación
-if [[ "$1" == "install" ]]; then
-  install_persistence
-  exit 0
-fi
-
-# Selección de perfil interactiva
 profiles=$(awk -F'[][]' '/\[.*\]/{print $2}' ~/.aws/credentials)
 
 if [ -z "$profiles" ]; then
@@ -44,16 +13,41 @@ echo "🔍 Perfiles disponibles:"
 select profile in $profiles; do
   if [ -n "$profile" ]; then
     echo "$profile" > ~/.aws/selected_profile
-    export AWS_PROFILE="$profile"
-    echo "✅ Perfil AWS seleccionado: $profile"
+
+    # Detectar si ~/.zshrc o ~/.bashrc ya exporta AWS_PROFILE
+    profile_autoloaded=false
+    if grep -q 'AWS_PROFILE=.*selected_profile' ~/.zshrc 2>/dev/null || grep -q 'AWS_PROFILE=.*selected_profile' ~/.bashrc 2>/dev/null; then
+      profile_autoloaded=true
+    else
+      echo "" >> ~/.zshrc
+      echo "# Auto-carga de AWS_PROFILE agregado por awsselect" >> ~/.zshrc
+      echo 'export AWS_PROFILE=$(cat ~/.aws/selected_profile 2>/dev/null)' >> ~/.zshrc
+    fi
 
     identity=$(aws sts get-caller-identity --output text 2>/dev/null)
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "✅ Perfil AWS seleccionado: $profile"
+    echo "📁 Guardado en: ~/.aws/selected_profile"
+    if [ "$profile_autoloaded" = false ]; then
+      echo "🛠️  Añadido automáticamente a ~/.zshrc"
+    fi
+
     if [ $? -eq 0 ]; then
+      echo ""
       echo "🔐 Cuenta activa:"
       echo "$identity"
     else
       echo "⚠️  No se pudo verificar la identidad con 'aws sts get-caller-identity'"
     fi
+
+    echo ""
+    echo "🚀 El perfil se aplicará automáticamente en TODAS las terminales nuevas."
+    echo "👉 Si querés aplicarlo ahora mismo, ejecutá:"
+    echo ""
+    echo "   export AWS_PROFILE=$profile"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     break
   else
     echo "❌ Opción inválida. Intentá de nuevo."

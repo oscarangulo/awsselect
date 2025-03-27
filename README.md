@@ -5,11 +5,9 @@ Herramienta interactiva para cambiar y persistir perfiles de AWS CLI fácilmente
 ## 🚀 Instalación con Homebrew
 
 ```bash
-brew tap tuusuario/awsselect
+brew tap oscarangulo/tools
 brew install awsselect
 ```
-
-> Asegurate de tener GitHub CLI configurado o el repositorio disponible públicamente.
 
 ---
 
@@ -17,17 +15,21 @@ brew install awsselect
 
 ```bash
 awsselect            # Muestra lista y selecciona perfil
-awsselect install    # Activa persistencia entre terminales
 ```
 
 ---
 
-## 🛠️ Cómo funciona
+## ✨ Novedad en v1.0.2
 
-- Lee perfiles desde `~/.aws/credentials`
-- Te permite seleccionar uno con `select` (menú interactivo)
-- Guarda el perfil en `~/.aws/selected_profile`
-- Modifica tu `~/.zshrc` o `~/.bashrc` para cargar automáticamente `AWS_PROFILE` en cada terminal
+- Ya **no es necesario ejecutar `awsselect install`**
+- El perfil seleccionado se guarda en `~/.aws/selected_profile`
+- El script agrega automáticamente al `~/.zshrc` la línea:
+
+```bash
+export AWS_PROFILE=$(cat ~/.aws/selected_profile 2>/dev/null)
+```
+
+Así, cada nueva terminal tendrá el perfil activo automáticamente.
 
 ---
 
@@ -38,11 +40,19 @@ $ awsselect
 🔍 Perfiles disponibles:
 1) default
 2) strixsoft
-3) staging
 #? 2
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ Perfil AWS seleccionado: strixsoft
-🔐 Cuenta activa:
-123456789012   arn:aws:iam::123456789012:user/dev
+📁 Guardado en: ~/.aws/selected_profile
+🛠️  Añadido automáticamente a ~/.zshrc
+
+🚀 El perfil se aplicará automáticamente en TODAS las terminales nuevas.
+👉 Si querés aplicarlo ahora mismo, ejecutá:
+
+   export AWS_PROFILE=strixsoft
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
@@ -51,7 +61,7 @@ $ awsselect
 
 ```bash
 brew uninstall awsselect
-brew untap tuusuario/awsselect
+brew untap oscarangulo/tools
 ```
 
 ---
@@ -68,4 +78,4 @@ awsselect/
 
 ## 🧑‍💻 Licencia
 
-MIT © TuNombre
+MIT © Oscar Angulo
